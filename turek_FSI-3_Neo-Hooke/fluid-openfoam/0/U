@@ -1,0 +1,80 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+
+    cylinder
+    {
+        type            noSlip;
+    }    
+
+    flap
+    {
+        type            movingWallVelocity;
+        value           uniform (0 0 0);
+    }
+
+    domain_walls
+    {
+        type            noSlip;
+    }
+
+
+    inlet
+    {
+        type            codedFixedValue;
+        value           uniform (0 0 0);   //dummy value
+
+        name            parabolicVelocity;  //dummy name
+        
+        code
+        #{
+            const vectorField& Cf=patch().Cf();  //Cf=face centre
+            vectorField& field=*this;
+
+            const scalar u_m=2;
+            const scalar H=0.41;
+            const scalar pi=3.14;
+            const scalar tf=2;
+            scalar t = this->db().time().value();
+
+            forAll(Cf,faceI)
+            {
+                if (t <= tf)
+                {
+                    const scalar y=Cf[faceI][1];
+                    field[faceI]=vector((6*u_m*(y/H)*(1-(y/H)))*0.5*(1-cos((pi*t)/2)),0,0);
+                }
+                else
+                {
+                    const scalar y=Cf[faceI][1];
+                    field[faceI]=vector(6*u_m*(y/H)*(1-(y/H)),0,0);
+                }
+            }
+
+        #};
+    }
+
+    outlet
+    {
+        //type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           $internalField;
+    }
+
+    frontAndBackPlanes
+    {
+        type            empty;
+    }
+}
