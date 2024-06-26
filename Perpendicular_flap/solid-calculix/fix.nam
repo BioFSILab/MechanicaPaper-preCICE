@@ -1,0 +1,12 @@
+** Names based on fix
+*NSET,NSET=Nfix 
+1, 
+4, 
+5, 
+6, 
+7, 
+*ELSET,ELSET=Efix 
+5, 
+6, 
+7, 
+8, 
